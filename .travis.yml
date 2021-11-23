@@ -1,0 +1,23 @@
+language: generic
+sudo: required
+services: 
+- docker
+
+before_install:
+  - docker build -t aniketmahangare/react-test -f ./client/Dockerfile.dev ./client
+
+script:
+  - docker run -e CI=true aniketmahangare/react-test npm test
+
+after_success:
+  - docker build -t aniketmahangare/multi-client ./client
+  - docker build -t aniketmahangare/multi-nginx ./nginx
+  - docker build -t aniketmahangare/multi-server ./server
+  - docker build -t aniketmahangare/multi-worker ./worker
+  # login to docker CLI
+  - docker login --username=$DOCKER_ID --password=$DOCKER_PASSWORD
+  - docker push aniketmahangare/multi-client
+  - docker push aniketmahangare/multi-nginx
+  - docker push aniketmahangare/multi-server
+  - docker push aniketmahangare/multi-worker
+  
